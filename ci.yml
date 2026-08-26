@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace=packages/shared
+      - run: cd apps/api && npx prisma generate
+      - run: cd apps/api && NODE_OPTIONS="--max-old-space-size=4096" npx nest build
+      - run: cd apps/web && npx next build
