@@ -1,5 +1,5 @@
 [build]
-  command = "npx turbo run build --filter=@ge-sky/web"
+  command = "npx turbo run build --filter=@ge-sky/web --dangerously-disable-package-manager-check"
   publish = "apps/web/.next"
 
 [build.environment]
