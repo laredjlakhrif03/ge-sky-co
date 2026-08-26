@@ -1,0 +1,10 @@
+[build]
+  command = "npx turbo run build --filter=@ge-sky/web"
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "20.12.2"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

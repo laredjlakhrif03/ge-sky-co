@@ -1,0 +1,1434 @@
+
+MASTER BUILD PROMPT — GE_Sky Platform
+Comprehensive AI Agent Build Instructions
+
+You are a world-class Full-Stack Engineering Agent specializing in enterprise SaaS platform development. Your mission is to build the GE_Sky platform from scratch — a production-ready, deployable, marketable All-in-One digital commerce and marketing operating system powered by Multi-Agent AI. This is NOT a prototype or demo. Build it as a complete, functional, interactive product ready for real users, deployment, and commercial launch.
+
+Follow every instruction in this document precisely. Do not skip sections. Do not simplify features. Do not leave placeholder logic. Every feature must be fully functional.
+
+---
+
+# ═══════════════════════════════════════
+# PART 1 — PROJECT IDENTITY & VISION
+# ═══════════════════════════════════════
+
+## 1.1 Platform Name
+GE_Sky — Global E-Commerce Sky
+
+## 1.2 One-Line Definition
+GE_Sky is a unified, AI-powered, multi-agent digital business operating system that combines e-commerce, digital marketing, CRM, analytics, automation, and AI-driven decision support into a single intelligent platform — replacing the fragmented stack of 5-8 separate tools with one cohesive system.
+
+## 1.3 Core Philosophy
+- "One platform instead of many tools"
+- "Intelligent automation instead of manual work"
+- "Unified data and vision instead of fragmented chaos"
+- "Smart operations instead of operational chaos"
+
+## 1.4 Target Users
+- E-commerce store owners (small to medium)
+- SMEs with digital presence
+- Digital marketing agencies managing multiple clients
+- Emerging D2C brands
+- Multi-channel commerce teams
+- Enterprise clients (with white-label needs)
+
+## 1.5 Business Model
+- SaaS subscription (monthly/yearly)
+- Three tiers: Basic, Advanced, Enterprise
+- 14-day free trial (no credit card required)
+- Setup/customization services (one-time fees)
+- Value-added services (integrations, custom automation, advanced reports)
+- White-label for Enterprise tier
+- Future: performance-based fees, marketplace fees
+
+## 1.6 Markets
+- Phase 1: Algeria (local launch)
+- Phase 2: North Africa (Tunisia, Morocco, Egypt) + Middle East (Saudi Arabia, UAE)
+- Phase 3: International expansion (emerging markets globally)
+
+---
+
+# ═══════════════════════════════════════
+# PART 2 — TECHNICAL ARCHITECTURE
+# ═══════════════════════════════════════
+
+## 2.1 Frontend Stack
+
+### Framework
+- React 18+ with Next.js 14+ (App Router)
+- TypeScript (strict mode, 100% type coverage)
+- SSR + SSG for marketing/SEO pages
+- ISR for product catalog pages
+- Streaming SSR for dashboard pages
+
+### State Management
+- Zustand for global UI state (theme, language, sidebar, notifications)
+- TanStack Query (React Query v5) for server state (all API data, caching, mutations, optimistic updates)
+- React Context for auth/session context only
+- URL state via Next.js searchParams for filters/sorting/pagination
+
+### Styling
+- Tailwind CSS v3.4+ (with JIT, custom config, dark mode via class strategy)
+- CSS Modules for component-scoped styles where needed
+- CSS Custom Properties for all design tokens (colors, spacing, radius, shadows, transitions, z-index, fonts)
+- @layer directives: base, components, utilities
+- No inline styles except for dynamic values from JS
+- Logical CSS properties (margin-inline, padding-block, inset-inline-start) for RTL/LTR
+
+### UI Component Library
+- Radix UI primitives (accessible, unstyled) as foundation
+- Custom design system built on Radix (not a pre-made library)
+- Shadcn/UI pattern: own the components, copy and customize
+- Framer Motion for animations and page transitions
+- Lucide React for icons (consistent stroke width, tree-shakeable)
+- Recharts for data visualization (charts, graphs)
+- React Hook Form + Zod for form handling and validation
+- TanStack Table for data tables (sorting, filtering, pagination, virtualization)
+- Sonner for toast notifications
+- Cmdk for command palette
+
+### Internationalization (i18n)
+- next-intl or next-i18next for multi-language support
+- Languages: Arabic (ar), French (fr), English (en) at launch
+- RTL support: automatic direction switching based on locale
+- All user-facing strings in translation files (JSON)
+- Date/time formatting withIntl.DateTimeFormat
+- Number formatting with Intl.NumberFormat
+- Currency formatting per locale
+- Language switcher in header (no page reload)
+
+### PWA
+- next-pwa for service worker generation
+- Web manifest with app icons, theme color, display standalone
+- Offline fallback page
+- Push notification support (web-push API)
+- Install prompt handling
+
+### Key Frontend Libraries
+next, react, react-dom typescript, @types/react, @types/node tailwindcss, postcss, autoprefixer framer-motion zustand @tanstack/react-query, @tanstack/react-table react-hook-form, zod, @hookform/resolvers @radix-ui/react-* (all primitives) lucide-react recharts react-hook-form sonner cmdk next-intl next-pwa date-fns clsx, tailwind-merge
+
+
+
+## 2.2 Backend Stack
+
+### Framework
+- Node.js 20+ LTS
+- NestJS 10+ (modular monolithic architecture)
+- TypeScript (strict mode, shared types with frontend)
+- Fastify adapter (instead of Express) for performance
+
+### Architecture Pattern
+- Modular Monolithic (feature-based modules)
+- Each feature is a self-contained module: controller, service, repository, dto, entity
+- Dependency Injection via NestJS DI container
+- Modules: Auth, Users, Tenants, Products, Orders, Customers, Campaigns, Content, Analytics, Automation, Integrations, Billing, Notifications, Files, Agents, Reports
+- Inter-module communication via events (EventEmitter) and direct service injection
+- Future path: extract modules into microservices when scale demands
+
+### API Design
+- REST API (primary) with OpenAPI/Swagger documentation
+- GraphQL API (secondary) for flexible client queries
+- API versioning: /api/v1/...
+- Rate limiting: per-IP and per-tenant
+- Request validation with class-validator + class-transformer
+- Response serialization with class-transformer (exclude sensitive fields)
+- Pagination: cursor-based for large datasets, offset for small
+- Error handling: global exception filter with structured error responses
+- Health checks: /api/health, /api/health/ready, /api/health/live
+
+### Authentication & Authorization
+- JWT-based authentication (access token + refresh token)
+- Access token: 15min expiry, stored in httpOnly secure cookie
+- Refresh token: 7-day expiry, stored in httpOnly secure cookie, rotated on use
+- Session management: Redis-backed session store
+- Password hashing: bcrypt with salt rounds 12
+- 2FA: TOTP-based (Google Authenticator compatible) with backup codes
+- OAuth: Google, Facebook social login (optional)
+- RBAC: role-based access control with custom roles
+  - Owner: full access + billing + security
+  - Admin: everything except billing
+  - Manager: module-specific management
+  - Staff: assigned module access with CRUD limits
+  - Accountant: financial views only
+  - Support: customer/ticket views only
+  - Agent: AI agent role with scoped permissions
+  - Partner: limited partner portal access
+  - Customer: customer portal access
+- Permission granularity: per-module, per-action (create, read, update, delete, approve, export)
+- Multi-tenant isolation: every query scoped by tenant_id
+
+### Key Backend Libraries
+@nestjs/core, @nestjs/common, @nestjs/platform-fastify @nestjs/config, @nestjs/jwt, @nestjs/passport @nestjs/typeorm, @nestjs/swagger @nestjs/event-emitter class-validator, class-transformer bcrypt, otplib, qrcode ioredis, @nestjs/bull, bull @nestjs/schedule handlebars (email templates)
+
+
+
+## 2.3 Database Architecture
+
+### Primary Database
+- PostgreSQL 16+ (primary relational database)
+- ORM: TypeORM or Prisma (choose Prisma for type safety and migration safety)
+- Connection pooling via PgBouncer or Prisma connection pool
+- Multi-tenant strategy: shared database, shared schema, tenant_id column on every table
+  - Row-level security policies for tenant isolation
+  - All queries automatically filtered by tenant context
+  - Tenant context injected via middleware/interceptor
+
+### Caching
+- Redis 7+ for:
+  - Session storage
+  - Token blacklisting
+  - Rate limiting counters
+  - Real-time presence (online status)
+  - Job queues (Bull)
+  - Feature flags
+  - Hot data caching (product catalogs, dashboards)
+  - Pub/Sub for real-time events
+
+### Search
+- Elasticsearch 8+ or Meilisearch for:
+  - Product search (full-text, fuzzy, faceted)
+  - Customer search
+  - Order search
+  - Log/analytics search
+  - Auto-complete suggestions
+
+### Time-Series (Future)
+- ClickHouse or TimescaleDB for:
+  - Analytics aggregation
+  - Event tracking
+  - Large-scale reporting
+
+### File Storage
+- MinIO (S3-compatible) or AWS S3 for:
+  - Product images
+  - User avatars
+  - Document uploads
+  - Export files
+  - Public CDN assets
+
+### Database Schema Overview
+Build the following core tables (not exhaustive — add all needed):
+-- Core tenants (id, name, plan, status, created_at, updated_at) users (id, tenant_id, email, password_hash, name, role, status, 2fa_secret, last_login, created_at) roles (id, name, permissions[]) permissions (id, module, action) user_roles (user_id, role_id) audit_logs (id, tenant_id, user_id, action, entity, entity_id, metadata, ip, timestamp)
+
+-- E-commerce stores (id, tenant_id, name, domain, status, config) products (id, tenant_id, store_id, name, description, price, currency, stock, sku, images, variants, status, created_at) product_variants (id, product_id, name, price, stock, sku) categories (id, tenant_id, name, parent_id, slug) orders (id, tenant_id, store_id, customer_id, status, total, currency, items, shipping, tax, created_at) order_items (id, order_id, product_id, variant_id, quantity, price) inventory (id, product_id, variant_id, warehouse_id, quantity, reserved) warehouses (id, tenant_id, name, address) shipments (id, order_id, carrier, tracking_number, status, estimated_delivery) returns (id, order_id, reason, status, refund_amount)
+
+-- CRM customers (id, tenant_id, name, email, phone, segment, tags, lifetime_value, status, created_at) customer_segments (id, tenant_id, name, criteria) customer_journey (id, customer_id, stage, action, timestamp) loyalty_points (id, customer_id, points, source, timestamp) communications (id, customer_id, channel, direction, content, timestamp)
+
+-- Marketing campaigns (id, tenant_id, name, type, channel, status, budget, start_date, end_date, metrics) campaign_templates (id, campaign_id, content, variables, language) email_lists (id, tenant_id, name, subscribers_count) subscribers (id, list_id, email, status, metadata) sms_campaigns (id, tenant_id, name, message, recipients, status) social_posts (id, tenant_id, platform, content, media, scheduled_at, status) ad_campaigns (id, tenant_id, platform, name, budget, target_audience, status, metrics)
+
+-- Content content_templates (id, tenant_id, type, name, html, variables) content_generations (id, template_id, content, status, ai_metadata) landing_pages (id, tenant_id, title, slug, content, status, metrics)
+
+-- Automation workflows (id, tenant_id, name, trigger, steps, status) workflow_executions (id, workflow_id, status, started_at, completed_at) automation_rules (id, tenant_id, event, conditions, actions, status) automation_logs (id, rule_id, entity, triggered_at, result)
+
+-- Analytics analytics_events (id, tenant_id, event_type, entity, entity_id, properties, timestamp) kpi_snapshots (id, tenant_id, kpi_name, value, period, timestamp) reports (id, tenant_id, type, parameters, data, created_by, created_at) dashboards (id, tenant_id, user_id, name, layout, widgets) dashboard_widgets (id, dashboard_id, type, config, position)
+
+-- Agents agents (id, tenant_id, type, name, status, config, last_active) agent_tasks (id, agent_id, type, input, output, status, created_at, completed_at) agent_logs (id, agent_id, action, result, timestamp)
+
+-- Billing subscriptions (id, tenant_id, plan, status, current_period_start, current_period_end, amount, currency) invoices (id, tenant_id, subscription_id, amount, status, due_date, paid_at) payments (id, invoice_id, method, amount, status, transaction_id, created_at)
+
+-- Integrations integrations (id, tenant_id, type, provider, config, status, connected_at) webhooks (id, tenant_id, url, events, secret, status) api_keys (id, tenant_id, name, key_hash, scopes, last_used, expires_at)
+
+-- Notifications notifications (id, tenant_id, user_id, type, title, message, read, created_at) notification_preferences (id, user_id, channel, enabled)
+
+
+
+## 2.4 Multi-Tenancy Architecture
+
+### Strategy
+- Shared database with tenant_id column on every table
+- Row-Level Security (RLS) policies in PostgreSQL
+- Tenant context resolver middleware: extracts tenant_id from JWT or subdomain
+- All repository queries automatically filter by tenant_id
+- Tenant isolation interceptor: rejects cross-tenant access
+- Per-tenant configuration table (features, limits, branding)
+- Per-tenant rate limiting and quota enforcement
+
+### Tenant Lifecycle
+- Provisioning: create tenant record, default config, seed data
+- Active: full access
+- Suspended: read-only + billing prompts
+- Cancelled: grace period then data retention then deletion
+
+---
+
+# ═══════════════════════════════════════
+# PART 3 — DESIGN SYSTEM & VISUAL IDENTITY
+# ═══════════════════════════════════════
+
+## 3.1 Design Tokens (CSS Custom Properties)
+
+```css
+:root {
+  /* Colors — Dominant Navy */
+  --color-navy: #0F2747;
+  --color-navy-dark: #0A1B33;
+  --color-navy-light: #1A3A5C;
+
+  /* Colors — Sky Blue Accent */
+  --color-sky: #1FA3C8;
+  --color-sky-light: #7BC4E8;
+  --color-sky-dark: #167A99;
+
+  /* Colors — Sharp Accents */
+  --color-green: #16D97A; /* success, growth */
+  --color-amber: #F5A623; /* warning, attention */
+  --color-coral: #FF6B6B; /* danger, alert */
+
+  /* Neutrals — Light Theme */
+  --color-white: #FFFFFF;
+  --color-near-white: #F8FAFC;
+  --color-light-gray: #E9EEF3;
+  --color-mid-gray: #6B7280;
+  --color-dark: #1A1A2E;
+
+  /* Neutrals — Dark Theme (override in [data-theme="dark"]) */
+  --color-bg-primary: #FFFFFF;       /* → #0A1B33 in dark */
+  --color-bg-secondary: #F8FAFC;     /* → #122544 in dark */
+  --color-bg-tertiary: #E9EEF3;      /* → #1A3A5C in dark */
+  --color-text-primary: #0F2747;     /* → #F0F4F8 in dark */
+  --color-text-secondary: #475569;   /* → #94A3B8 in dark */
+  --color-text-muted: #6B7280;       /* → #64748B in dark */
+  --color-border-default: #E2E8F0;  /* → #1E3A5F in dark */
+  --color-border-subtle: #F1F5F9;   /* → #152544 in dark */
+
+  /* Semantic */
+  --color-accent-primary: #1FA3C8;
+  --color-accent-secondary: #7BC4E8;
+  --color-success: #16D97A;
+  --color-warning: #F5A623;
+  --color-danger: #FF6B6B;
+  --color-info: #1FA3C8;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15,39,71,0.08);
+  --shadow-md: 0 4px 12px rgba(15,39,71,0.12);
+  --shadow-lg: 0 12px 32px rgba(15,39,71,0.16);
+  --shadow-xl: 0 24px 64px rgba(15,39,71,0.20);
+  --shadow-glow: 0 0 32px rgba(31,163,200,0.25);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-Index */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 500;
+  --z-modal: 1000;
+  --z-toast: 2000;
+
+  /* Typography */
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg-primary: #0A1B33;
+  --color-bg-secondary: #122544;
+  --color-bg-tertiary: #1A3A5C;
+  --color-text-primary: #F0F4F8;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-border-default: #1E3A5F;
+  --color-border-subtle: #152544;
+}
+3.2 Typography System
+
+/* Font Loading */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Fluid Typography with clamp() */
+--font-size-hero: clamp(2.5rem, 5vw + 1rem, 5rem);
+--font-size-h1: clamp(2rem, 3vw + 1rem, 3.5rem);
+--font-size-h2: clamp(1.5rem, 2vw + 0.75rem, 2.5rem);
+--font-size-h3: clamp(1.25rem, 1.5vw + 0.5rem, 1.75rem);
+--font-size-h4: clamp(1.125rem, 1vw + 0.5rem, 1.375rem);
+--font-size-body: clamp(1rem, 0.5vw + 0.875rem, 1.125rem);
+--font-size-small: clamp(0.875rem, 0.3vw + 0.75rem, 1rem);
+--font-size-mono: clamp(0.875rem, 0.3vw + 0.75rem, 1rem);
+
+/* Line Heights */
+--line-height-tight: 1.1;
+--line-height-snug: 1.3;
+--line-height-normal: 1.5;
+--line-height-relaxed: 1.75;
+
+/* Letter Spacing */
+--tracking-tight: -0.02em;
+--tracking-normal: 0;
+--tracking-wide: 0.05em;
+--tracking-wider: 0.1em;
+3.3 Design Aesthetic
+Visual Direction
+Style: Editorial-Tech Luxury
+Tone: Refined, confident, intelligent, atmospheric
+Memorable Element: Cinematic page-load reveals with staggered animations, atmospheric gradient meshes, dominant deep-navy/sky-blue palette
+Feel: Premium operating system, not a website
+Layout Principles
+Break rigid grids — use asymmetry, overlap, diagonal flow
+Generous negative space in marketing pages
+Controlled density in dashboard tables and forms
+Overlapping elements with z-index layering
+Diagonal section dividers with clip-path
+Never default to centered card stacks
+Backgrounds
+Never flat solid backgrounds
+Gradient meshes (radial-gradient layered)
+SVG noise texture overlay (low opacity, mix-blend-mode)
+Geometric patterns (repeating-linear-gradient)
+Frosted glass (backdrop-filter: blur)
+Dramatic multi-layer shadows
+Decorative borders (border-image, clip-path)
+Motion
+Cinematic page-load: staggered fade-up (opacity 0→1, translateY(20px→0), 600ms, 100ms stagger)
+Hero text: clip-path reveal or mask animation (800ms ease-out)
+Card hover: translateY(-4px) + shadow enhancement (250ms)
+Modal entrance: scale(0.95)→scale(1) + opacity + backdrop blur (300ms)
+Ambient background: slow infinite gradient shift (20s linear infinite)
+Loading: shimmer sweep (linear gradient, 1.5s)
+Scroll reveal: IntersectionObserver triggers staggered animation (500ms)
+ALL animations must respect prefers-reduced-motion: reduce
+═══════════════════════════════════════
+PART 4 — PLATFORM MODULES & FEATURES
+═══════════════════════════════════════
+Build the following modules as complete, functional features. Each module must have:
+
+Full CRUD operations
+List view with table, filters, search, pagination
+Detail view with all fields
+Create/Edit forms with validation
+Delete with confirmation
+Export (CSV, PDF)
+Role-based access control
+Audit logging
+Real-time updates where applicable
+4.1 Authentication & Onboarding Module
+Features
+Registration (email + password, with email verification)
+Login (email + password, with 2FA support)
+Password reset (email-based token flow)
+Magic link login (passwordless)
+Social login (Google, Facebook OAuth)
+2FA setup (TOTP, QR code, backup codes)
+Tenant creation during registration
+Onboarding wizard (5 steps):
+Business info (name, type, country, currency)
+Store setup (name, domain, template)
+Product import (CSV upload or manual entry or skip)
+Connect integrations (email, SMS, social, payment)
+Team invitations (invite team members)
+Dashboard redirect after onboarding
+Profile settings (name, avatar, language, theme, notifications)
+Implementation
+JWT auth with httpOnly cookies
+Refresh token rotation
+Session management via Redis
+Rate limiting on auth endpoints
+Password strength validation (min 8 chars, complexity)
+Email service (transactional emails via Handlebars templates)
+Account lockout after 5 failed attempts (30min)
+4.2 E-Commerce Module
+Store Management
+Create multiple stores per tenant
+Per-store configuration (name, logo, domain, theme, currency)
+Store status (active, maintenance, closed)
+Custom domain support (CNAME verification)
+Storefront builder (drag-and-drop sections)
+Product Management
+Product CRUD (name, description, price, currency, SKU, barcode, weight, dimensions)
+Product variants (size, color, material — unlimited variant axes)
+Product images (multiple, drag-reorder, alt text per image)
+Product categories (nested, with slug, image)
+Product tags
+Inventory management (per-variant stock, warehouse tracking)
+Low stock alerts (configurable threshold)
+Bulk product import (CSV) and export
+Product status: draft, active, archived
+Price management (cost price, sale price, compare-at price)
+SEO fields per product (meta title, meta description, URL slug)
+Digital products (downloadable files)
+Product reviews and ratings (customer-facing)
+Order Management
+Order list with filters (status, date, customer, value, channel)
+Order detail (items, customer info, shipping, payment, timeline)
+Order status workflow: pending → confirmed → processing → shipped → delivered → completed
+Order editing (add/remove items, adjust shipping, apply discount)
+Order refunds (full/partial, with reason)
+Order returns (return request, approval, refund, restock)
+Order notes (internal staff notes)
+Order export (CSV, PDF invoice)
+Bulk order actions (confirm, ship, export)
+Real-time order notifications (WebSocket)
+Shopping Cart & Checkout
+Cart (add, remove, update quantity, clear)
+Guest checkout and registered customer checkout
+Multi-step checkout: shipping → payment → review → confirmation
+Shipping address management
+Shipping rate calculation (by weight, value, zone)
+Tax calculation (by region)
+Discount/coupon application at checkout
+Order confirmation email
+Guest cart to account cart merge on login
+Payment Integration
+Payment methods: COD, CIB (Algerian bank cards), Edahabia (Algerian Post), Stripe (international cards), PayPal, bank transfer
+Payment status tracking
+Refund processing
+Payment gateway configuration per tenant
+Transaction logs
+Multi-currency support with real-time exchange rates
+Installment payment support (integration with financing partners)
+Inventory & Warehouse
+Multi-warehouse support
+Stock tracking per warehouse
+Stock transfers between warehouses
+Stock adjustment (with reason logging)
+Low stock alerts
+Stock history log
+Barcode scanning support (camera API for mobile)
+Shipping & Delivery
+Integration with multiple carriers (local + international)
+Shipping zones and rates
+Real-time tracking (API polling or webhook)
+Shipping label generation
+Delivery confirmation
+Return shipping management
+4.3 Marketing Module
+Email Marketing
+Email campaign builder (drag-and-drop editor)
+Email templates (responsive, MJML-based)
+Subscriber list management (import, export, segment, suppress)
+Double opt-in subscription
+Unsubscribe management (automatic)
+Email scheduling (send now, send later, recurring)
+Email personalization (merge tags, dynamic content blocks)
+A/B testing (subject lines, content, send time)
+Email analytics (opens, clicks, bounces, unsubscribes, conversions)
+Drip campaigns (automated email sequences triggered by events)
+Transactional emails (order confirmations, shipping notifications, password resets — separate from marketing)
+SMS Marketing
+SMS campaign creation
+SMS templates with merge tags
+Contact list management
+SMS scheduling
+SMS analytics (delivery rate, click rate)
+Two-way SMS (for customer support)
+SMS gateway integration (local + international providers)
+Social Media Management
+Multi-platform posting (Facebook, Instagram, WhatsApp Business, TikTok, Twitter/X, LinkedIn, YouTube, Telegram)
+Post scheduling and calendar view
+Content library (reusable media and captions)
+Social inbox (aggregate messages from all platforms)
+Social analytics (engagement, reach, clicks, growth)
+Auto-post from product feed (new product → social post)
+Social listening (keyword monitoring)
+Ad Campaign Management
+Facebook/Instagram Ads (create, manage, track)
+TikTok Ads
+Google Ads (Search, Display)
+Budget management across channels
+Ad performance tracking (ROAS, CAC, CTR, CPL)
+Ad creative library
+Retargeting campaign builder
+Audience management (custom audiences, lookalike audiences)
+SEO Tools
+On-page SEO analysis (for product and content pages)
+Meta tag management (title, description, OG tags)
+Sitemap generation (automatic)
+Robots.txt management
+Schema markup (Product, Organization, BreadcrumbList, FAQPage, Review)
+SEO audit dashboard (issues, recommendations)
+Keyword tracking (integration with search console APIs)
+Internal linking suggestions
+Landing Pages
+Landing page builder (drag-and-drop)
+Templates (product launch, lead capture, webinar signup, flash sale)
+A/B testing for landing pages
+Form integration (connect to CRM)
+Analytics tracking (visitors, conversions, bounce rate)
+Custom domain support for landing pages
+4.4 CRM Module
+Customer Management
+Customer database (name, email, phone, address, notes, tags, avatar)
+Customer profile (360-degree view: orders, communications, journey, loyalty, tickets)
+Customer segments (dynamic rules-based + manual assignment)
+Customer import/export (CSV)
+Customer merge (deduplicate)
+Customer activity timeline
+Customer lifetime value (CLV) calculation
+Customer health score (based on recency, frequency, value)
+Pipeline Management
+Visual pipeline board (drag-and-drop deals across stages)
+Custom pipeline stages per tenant
+Deal management (value, expected close date, probability, assigned to)
+Deal activities (calls, emails, meetings, tasks)
+Pipeline analytics (win rate, average deal size, sales cycle)
+Customer Journey
+Journey mapping (awareness → consideration → purchase → retention → advocacy)
+Touchpoint tracking (every interaction logged)
+Journey stage automation (auto-move customers based on actions)
+Journey analytics (conversion rates between stages, drop-off points)
+Loyalty Program
+Points system (earn on purchase, referrals, reviews, social shares)
+Points redemption (discounts, free products, exclusive access)
+Tier system (Bronze, Silver, Gold, Platinum with increasing benefits)
+Referral program (unique referral links, tracking, rewards)
+Birthday rewards
+Loyalty dashboard for customers
+Customer Support
+Ticket system (create, assign, track, resolve)
+Help desk inbox (aggregate from email, chat, social)
+Knowledge base (articles, FAQs, searchable)
+Live chat (real-time via WebSocket)
+Chatbot (AI-powered for common questions)
+CSAT surveys after resolution
+SLA management (response time, resolution time tracking)
+4.5 Analytics Module
+Dashboard
+Customizable dashboard (drag-and-drop widgets)
+Default dashboards per role (Owner, Marketing, Sales, Support, Accountant)
+Widget types: KPI card, line chart, bar chart, pie chart, table, gauge, heatmap
+Date range selector (today, 7d, 30d, 90d, custom)
+Comparison mode (compare to previous period)
+Real-time metrics (live orders, active users, revenue today)
+Auto-refresh intervals
+Key Metrics
+Revenue (total, by store, by product, by channel)
+Orders (count, average order value, conversion rate)
+Customers (new, returning, churn rate, CLV)
+Marketing (ROAS, CAC, CTR, CPL, email open rate)
+Inventory (stock value, turnover rate, low stock alerts)
+Support (ticket volume, resolution time, CSAT)
+Reports
+Revenue report (daily, weekly, monthly, custom)
+Product performance report
+Customer acquisition report
+Marketing ROI report
+Inventory report
+Tax report
+Export to PDF, CSV, Excel
+Scheduled reports (email delivery)
+Custom report builder
+Real-Time Analytics
+Live event stream (orders, visits, signups)
+Real-time charts (updating without refresh)
+Activity feed (recent actions across platform)
+Alert system (threshold-based notifications)
+4.6 Automation Module
+Workflow Builder
+Visual workflow builder (node-based, drag-and-drop)
+Trigger types: event-based (order placed, customer signup, low stock), time-based (schedule), manual
+Action types: send email, send SMS, update record, create task, call agent, delay, conditional branch, loop
+Workflow templates (pre-built common automations)
+Workflow testing (dry run)
+Workflow execution history
+Workflow performance metrics (execution time, success rate)
+Automation Rules
+Rule-based automation (IF-THEN rules)
+Event listener system (subscribe to platform events)
+Condition builder (field, operator, value)
+Action executor (perform one or more actions)
+Rule priority and conflict resolution
+Rule enable/disable toggle
+Rule execution logging
+Common Automations (Pre-built)
+New order → email confirmation + update inventory + notify shipping + update CRM
+New customer → welcome email + add to CRM + assign segment + schedule follow-up
+Abandoned cart → reminder email after 1h + SMS after 24h + discount after 72h
+Low stock → alert manager + suggest reorder + update product status
+Low-performing campaign → alert + suggest changes + pause if below threshold
+Customer birthday → send reward + personalized email
+Win-back campaign → detect churn risk + send re-engagement sequence
+4.7 AI Agents Module
+Agent Types (Build Each as a Functional Service)
+Agent 1: Audience Analyst
+Analyzes customer behavior data (purchases, browsing, engagement)
+Segments customers automatically (RFM analysis, behavioral clustering)
+Identifies high-value segments, at-risk segments, growth segments
+Generates audience insights reports
+Feeds segment data to Campaign Builder agent
+API: POST /api/v1/agents/audience/analyze
+Agent 2: Campaign Builder
+Creates campaign structures based on goals and audience data
+Suggests budget allocation across channels
+Recommends ad creative variations
+Sets up A/B tests automatically
+Monitors campaign performance and suggests optimizations
+Can auto-pause underperforming campaigns
+API: POST /api/v1/agents/campaigns/build
+Agent 3: Content Generator
+Generates marketing copy (ad headlines, descriptions, email subject lines, body content)
+Generates product descriptions from product data
+Generates social media posts
+Generates SEO content (meta descriptions, blog outlines)
+Supports multiple languages (ar, fr, en)
+Learns from user edits and preferences
+API: POST /api/v1/agents/content/generate
+Agent 4: Product Recommender
+Analyzes customer purchase history and browsing behavior
+Generates personalized product recommendations
+Creates "frequently bought together" bundles
+Identifies cross-sell and upsell opportunities
+Powers on-site recommendation widgets
+API: POST /api/v1/agents/recommend
+Agent 5: Customer Manager
+Monitors customer health scores
+Predicts churn risk (based on engagement decline, support tickets, order frequency)
+Triggers win-back automations
+Manages customer segmentation updates
+Suggests personalized communication
+API: POST /api/v1/agents/customers/manage
+Agent 6: Decision Support
+Analyzes overall business performance
+Identifies trends, anomalies, opportunities
+Generates executive summaries and recommendations
+Provides what-if analysis (e.g., "What if you increase ad spend by 20%?")
+Suggests strategic actions with predicted impact
+API: POST /api/v1/agents/decision/analyze
+Agent 7: Automation Orchestrator
+Coordinates all other agents
+Manages agent task queues and priorities
+Resolves conflicts between agent recommendations
+Learns from user acceptance/rejection of suggestions
+Schedules regular analysis runs
+API: POST /api/v1/agents/orchestrator/run
+Agent Architecture
+Each agent is a NestJS service module
+Agents communicate via internal event bus
+Each agent has a task queue (Bull queue + Redis)
+Agent tasks are async with progress tracking
+Agent results stored in agent_tasks and agent_logs tables
+User can configure agent autonomy level: suggest-only, auto-execute-with-approval, full-auto
+Agent dashboard showing recent agent activities and suggestions
+Agent settings per tenant (enable/disable, autonomy level, frequency)
+AI Integration
+OpenAI API (GPT-4 Turbo) for text generation and analysis
+Or local LLM (Ollama) for cost-sensitive deployments
+Embedding model for semantic search (OpenAI embeddings or local model)
+Vector database (pgvector or Pinecone) for similarity search
+Prompt templates stored in database (per-agent, per-language)
+Rate limiting and cost tracking per tenant
+4.8 Integrations Module
+Payment Integrations
+COD (built-in, no integration needed)
+CIB (Algerian payment gateway API integration)
+Edahabia (Algerian Post API integration)
+Stripe (international payments)
+PayPal
+Configuration UI per payment method
+Test mode / live mode toggle
+Webhook handlers for payment events
+Shipping Integrations
+Local carriers (Algerian delivery companies — Yalidine, ZR Express, Maystro Delivery, etc.)
+International carriers (DHL, FedEx, Aramex)
+API configuration per carrier
+Rate calculation API
+Tracking API
+Label generation API
+Email Integrations
+SendGrid
+Mailgun
+Amazon SES
+SMTP configuration (custom)
+Email template management
+Delivery analytics
+SMS Integrations
+Local SMS providers (Algerian)
+Twilio (international)
+MessageBird
+SMS template management
+Social Media Integrations
+Facebook Business API (Pages, Ads, Instagram)
+WhatsApp Business API
+TikTok Business API
+Twitter/X API
+LinkedIn API
+YouTube Data API
+Telegram Bot API
+OAuth flow for each platform
+Token management (refresh, revoke)
+Rate limiting per platform
+Analytics Integrations
+Google Analytics 4 (measurement protocol + data API)
+Google Search Console
+Meta Pixel
+TikTok Pixel
+Google Tag Manager support
+Custom tracking pixel
+Webhook System
+Inbound webhooks (receive events from external services)
+Outbound webhooks (send events to external URLs)
+Webhook configuration UI (URL, events, secret)
+Webhook retry logic (exponential backoff)
+Webhook delivery logs
+Signed payloads (HMAC verification)
+API Gateway
+REST API (full CRUD for all resources)
+GraphQL API (flexible querying)
+OpenAPI/Swagger documentation (interactive)
+API key management (create, revoke, scope)
+Rate limiting (per-key, per-IP, per-tenant)
+Webhook events list
+SDK generation (JavaScript, Python, PHP)
+API Playground (test endpoints in browser)
+4.9 Billing & Subscriptions Module
+Features
+Subscription plans: Basic, Advanced, Enterprise
+Plan configuration (features, limits, price)
+Free trial: 14 days, no credit card
+Subscription lifecycle: trial → active → past_due → cancelled → deleted
+Automatic billing (monthly or yearly)
+Proration on plan change
+Invoice generation and history
+Payment method management
+Usage tracking (against plan limits)
+Overage charges (if applicable)
+Dunning management (failed payment retry sequence)
+Plan comparison page
+Billing notifications (upcoming renewal, payment failed, invoice ready)
+Implementation
+Stripe Billing or custom billing engine
+Invoice PDF generation
+Email notifications for billing events
+Tax handling (VAT for applicable regions)
+Coupon/discount support
+Affiliate/referral credits
+4.10 Notifications Module
+Features
+In-app notifications (bell icon, dropdown list)
+Email notifications (transactional + marketing)
+SMS notifications (critical alerts)
+Push notifications (PWA + mobile)
+WebSocket real-time notifications
+Notification preferences per user (per category, per channel)
+Notification grouping and batching
+Read/unread status
+Archive/delete
+Notification center (full page view with filters)
+Notification Types
+Order notifications (new order, order status change, refund)
+Customer notifications (new customer, churn alert, support ticket)
+Marketing notifications (campaign performance, budget alerts)
+Inventory notifications (low stock, out of stock)
+System notifications (security alerts, billing, maintenance)
+Agent notifications (suggestions ready, task completed, anomaly detected)
+Team notifications (mentions, assignments, approvals)
+4.11 File Management Module
+Features
+Upload (drag-and-drop, paste, URL import)
+Image optimization (automatic resize, compression, WebP conversion)
+File preview (images, PDFs, documents)
+File organization (folders, tags)
+File sharing (public links, expiring links)
+File usage tracking (where is this file used?)
+Bulk delete
+Storage quota per tenant
+CDN delivery for public assets
+4.12 Settings & Configuration Module
+General Settings
+Business profile (name, logo, address, contact)
+Regional settings (language, timezone, currency, date format)
+Tax settings (rates per region)
+Shipping settings (origin address, default rates)
+Team Management
+Invite team members (email invitation)
+Assign roles and permissions
+Edit/remove team members
+Team activity log
+Seat usage tracking
+Security Settings
+Password policy configuration
+2FA enforcement (require for all team members)
+Session timeout configuration
+IP allowlisting (optional)
+API key management
+Audit log access
+Data export (GDPR compliance)
+Data deletion (GDPR right to be forgotten)
+Integration Settings
+Connect/disconnect integrations
+Configure integration settings
+View integration status and logs
+Revoke integration access
+Appearance Settings
+Theme selection (light, dark, custom)
+Branding (logo, colors, fonts — for Enterprise)
+Dashboard layout customization
+Sidebar configuration (collapse, reorder, hide)
+═══════════════════════════════════════
+PART 5 — APP SHELL & NAVIGATION
+═══════════════════════════════════════
+5.1 Layout Structure
+
+┌─────────────────────────────────────────────────────┐
+│ HEADER: Logo | Global Search | Notif | Profile | Theme│
+├──────────┬──────────────────────────────────────────┤
+│          │                                            │
+│ SIDEBAR  │            MAIN CONTENT AREA               │
+│          │                                            │
+│ - Dashboard                                           │
+│ - Store    ┌────────────────────────────────────────┐ │
+│ - Marketing│                                        │ │
+│ - CRM      │         (Active Module View)            │ │
+│ - Analytics│                                        │ │
+│ - Automation│                                       │ │
+│ - Agents   │                                        │ │
+│ - Integr.  └────────────────────────────────────────┘ │
+│ - Settings │                                          │
+│ - Billing  │          (Footer: version, status)       │
+│          │                                            │
+└──────────┴──────────────────────────────────────────┘
+5.2 Sidebar Navigation
+Collapsible (expand/collapse toggle with persistence)
+Icon + label (icons only when collapsed)
+Active item highlighted with sky-blue accent
+Module groups with expandable sections
+Store switcher at top (multi-store dropdown)
+Quick actions button (command palette)
+User menu at bottom (profile, settings, logout)
+5.3 Header
+Logo (left, clickable to dashboard)
+Global search (center, cmd+K shortcut)
+Notifications bell (with unread count badge)
+Theme toggle (light/dark)
+Language switcher
+User avatar dropdown (profile, settings, billing, logout)
+Frosted glass effect (backdrop-filter: blur(12px) + semi-transparent background)
+Sticky with shadow on scroll
+5.4 Main Content Area
+Breadcrumb navigation at top
+Page title + action buttons (right-aligned)
+Content area with max-width constraint
+Responsive: full-width on mobile (sidebar collapses to drawer)
+ ══════════════════════════════════════
+PART 6 — PAGES TO BUILD
+═══════════════════════════════════════
+6.1 Public/Marketing Pages (SSR/SSG)
+Landing Page (/)
+Hero section: animated gradient mesh background, staggered text reveal, CTA buttons
+Problem statement section: "Companies don't lack tools, they lack coordination"
+Solution section: "One platform instead of many tools"
+Features grid: e-commerce, marketing, CRM, analytics, automation, AI agents
+How it works: 3-step visual flow
+Social proof: testimonials, logos, stats
+Pricing: 3-tier comparison table
+FAQ section (accordion, structured data)
+CTA section: "Start your 14-day free trial"
+Footer: links, social, legal
+Features Pages (/features/[module])
+One page per module (e-commerce, marketing, crm, analytics, automation, agents)
+Each with: hero, feature list, screenshots/mockups, use cases, CTA
+Pricing Page (/pricing)
+Plan comparison table
+Feature matrix
+FAQ
+CTA per plan
+About Page (/about)
+Mission, vision, team, values
+Contact Page (/contact)
+Contact form, map, social links
+Legal Pages (/legal/privacy, /legal/terms, /legal/gdpr)
+Privacy policy, terms of service, GDPR compliance, cookie policy
+Blog (/blog)
+Article list, article detail, categories, search
+Help/Docs (/docs)
+API documentation (interactive Swagger UI)
+User guides
+Video tutorials
+FAQ knowledge base
+6.2 Auth Pages
+Login (/login)
+Email + password form
+2FA input (conditional)
+"Forgot password" link
+Social login buttons
+"Remember me" checkbox
+Redirect to dashboard on success
+Register (/register)
+Business info form
+Email + password
+Plan selection (trial starts on all features)
+ToS + Privacy agreement checkboxes
+Redirect to onboarding wizard
+Forgot Password (/forgot-password)
+Email input
+Send reset link
+Success confirmation
+Reset Password (/reset-password)
+New password form
+Password confirmation
+Strength indicator
+2FA Setup (/setup-2fa)
+QR code display
+Verification code input
+Backup codes display + download
+6.3 App Pages (Authenticated)
+Dashboard (/app)
+Welcome widget (greeting, quick stats)
+KPI cards (revenue, orders, customers, conversion) — animated count-up on load
+Recent orders table (5 latest)
+Recent customer signups
+Marketing performance mini-chart
+Agent suggestions widget
+Quick action buttons
+Activity feed (recent platform events)
+Weather/date/time widget
+Store Pages
+/app/stores — Store list + management
+/app/stores/[id] — Store settings + configuration
+/app/stores/[id]/products — Product list with table view, filters, bulk actions
+/app/stores/[id]/products/new — Product creation form (full: basic info, pricing, inventory, shipping, SEO, images)
+/app/stores/[id]/products/[productId] — Product detail/edit
+/app/stores/[id]/orders — Order list with table, filters, status tabs
+/app/stores/[id]/orders/[orderId] — Order detail (items, customer, shipping, payment, timeline, notes)
+/app/stores/[id]/inventory — Inventory dashboard with stock levels, alerts, adjustments
+/app/stores/[id]/customers — Customer list (redirects to CRM customers filtered by store)
+/app/stores/[id]/settings — Store settings (name, domain, theme, currency, payment, shipping)
+Marketing Pages
+/app/marketing — Marketing overview dashboard (campaign performance across channels)
+/app/marketing/email — Email campaign list + builder
+/app/marketing/email/[id] — Email campaign detail (editor, schedule, analytics)
+/app/marketing/sms — SMS campaign list + builder
+/app/marketing/social — Social media management (calendar, posts, inbox)
+/app/marketing/ads — Ad campaign management (create, monitor, optimize)
+/app/marketing/seo — SEO tools dashboard (audit, keywords, sitemap)
+/app/marketing/landing-pages — Landing page list + builder
+CRM Pages
+/app/crm — CRM dashboard (pipeline overview, recent activities, KPIs)
+/app/crm/customers — Customer list with table, filters, segments
+/app/crm/customers/[id] — Customer 360 profile (orders, communications, journey, loyalty, tickets)
+/app/crm/pipeline — Pipeline board (drag-and-drop deals)
+/app/crm/segments — Customer segments management
+/app/crm/loyalty — Loyalty program configuration
+/app/crm/support — Support tickets (inbox, detail, knowledge base)
+Analytics Pages
+/app/analytics — Analytics dashboard (revenue, orders, customers, marketing)
+/app/analytics/revenue — Revenue report
+/app/analytics/products — Product performance report
+/app/analytics/customers — Customer acquisition report
+/app/analytics/marketing — Marketing ROI report
+/app/analytics/custom — Custom report builder
+Automation Pages
+/app/automation — Automation overview
+/app/automation/workflows — Workflow list + visual builder
+/app/automation/workflows/[id] — Workflow detail (visual builder, execution history)
+/app/automation/rules — Rule list + editor
+/app/automation/history — Execution history log
+Agents Pages
+/app/agents — Agent dashboard (overview of all agents, recent activities)
+/app/agents/[type] — Agent detail (config, task history, suggestions)
+/app/agents/settings — Agent settings per tenant (enable/disable, autonomy level)
+Integrations Pages
+/app/integrations — Integration marketplace (browse, connect, configure)
+/app/integrations/[provider] — Integration detail (config, status, logs)
+/app/integrations/api — API key management + documentation access
+/app/integrations/webhooks — Webhook management
+Settings Pages
+/app/settings — General settings
+/app/settings/team — Team management
+/app/settings/security — Security settings
+/app/settings/billing — Billing & subscription
+/app/settings/appearance — Theme & layout preferences
+Customer Portal Pages (Storefront)
+/store/[domain] — Storefront homepage (product grid, categories, search)
+/store/[domain]/product/[slug] — Product detail page
+/store/[domain]/cart — Shopping cart
+/store/[domain]/checkout — Multi-step checkout
+/store/[domain]/account — Customer account (orders, addresses, loyalty, returns)
+/store/[domain]/account/orders — Order history
+/store/[domain]/account/loyalty — Loyalty points & rewards
+═══════════════════════════════════════
+PART 7 — SECURITY REQUIREMENTS
+═══════════════════════════════════════
+7.1 Authentication Security
+bcrypt password hashing (salt rounds 12)
+JWT access tokens (15min) + refresh tokens (7 days, rotated)
+httpOnly + secure + sameSite cookies
+2FA (TOTP) with backup codes
+Rate limiting: 5 login attempts per 15min per IP
+Account lockout: 5 failed attempts → 30min lock
+Session invalidation on password change
+Password breach check (haveibeenpwned API or similar)
+7.2 Data Security
+TLS 1.3 for all connections
+AES-256 encryption at rest (database)
+Sensitive data encryption (API keys, payment credentials)
+PII data minimization and pseudonymization where possible
+Data retention policies (configurable per tenant)
+Secure data deletion (GDPR right to be forgotten)
+7.3 Application Security
+Input validation on all endpoints (class-validator)
+Output encoding to prevent XSS
+SQL injection prevention (parameterized queries via ORM)
+CSRF protection (sameSite cookies + CSRF tokens for state-changing requests)
+Content Security Policy headers
+Security headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy
+CORS configuration (allowlist origins)
+File upload validation (type, size, content)
+Rate limiting on all API endpoints
+Request size limiting
+7.4 Audit & Compliance
+Comprehensive audit logging (who, what, when, where)
+Audit log retention: 90 days (standard), 1 year (Enterprise)
+Audit log export (CSV, PDF)
+GDPR compliance: data export, data deletion, consent management
+Data processing agreements (DPA) support
+Incident response plan
+═══════════════════════════════════════
+PART 8 — PERFORMANCE REQUIREMENTS
+═══════════════════════════════════════
+8.1 Frontend Performance
+Lighthouse score: 90+ on all metrics (Performance, Accessibility, Best Practices, SEO)
+First Contentful Paint: < 1.5s
+Largest Contentful Paint: < 2.5s
+Time to Interactive: < 3.5s
+Cumulative Layout Shift: < 0.1
+Total Blocking Time: < 200ms
+Bundle size: < 200KB initial (gzipped)
+Code splitting: per-route, per-module
+Lazy loading: below-the-fold images, heavy components
+Image optimization: WebP, responsive srcset, lazy loading
+Font loading: font-display swap, preconnect, preload critical fonts
+8.2 Backend Performance
+API response time: < 200ms for 95% of requests
+Database query time: < 50ms for 95% of queries
+Connection pooling ( PgBouncer or Prisma pool)
+Query optimization (indexes, N+1 elimination, eager loading)
+Caching strategy: Redis for hot data, HTTP caching headers, ETags
+Background jobs for heavy operations (email sending, report generation, imports)
+Pagination: cursor-based for large datasets
+Rate limiting: 100 req/min per tenant (adjustable per plan)
+8.3 Real-Time
+WebSocket connection for live updates (new orders, notifications, agent activities)
+Fallback to polling if WebSocket unavailable
+Efficient event broadcasting (only to relevant tenants/users)
+═══════════════════════════════════════
+PART 9 — ACCESSIBILITY REQUIREMENTS
+═══════════════════════════════════════
+WCAG 2.1 AA compliance
+Semantic HTML (header, nav, main, section, article, aside, footer)
+ARIA labels on all interactive elements
+Keyboard navigation (tab order, focus visible, no traps)
+Screen reader testing (NVDA, VoiceOver)
+Color contrast: 4.5:1 minimum (normal text), 3:1 (large text)
+Focus indicators: visible, high-contrast focus rings
+prefers-reduced-motion: disable non-essential animations
+prefers-color-scheme: automatic theme adaptation
+Form labels: every input has a visible or sr-only label
+Error messages: associated with fields via aria-describedby
+Skip-to-content link
+Live regions for dynamic content (aria-live)
+Touch target size: minimum 44x44px
+High contrast mode support (@media forced-colors)
+═══════════════════════════════════════
+PART 10 — BUILD INSTRUCTIONS
+═══════════════════════════════════════
+10.1 Build Order (Execute Sequentially)
+Phase 1: Foundation
+Initialize Next.js project with TypeScript, Tailwind, App Router
+Configure ESLint, Prettier, TypeScript strict mode
+Set up design tokens (CSS custom properties in globals.css)
+Configure next-intl for i18n (ar, fr, en)
+Configure dark mode (class strategy, data-theme attribute)
+Set up font loading (Sora, DM Sans, JetBrains Mono)
+Initialize NestJS backend project
+Configure Prisma with PostgreSQL schema
+Set up Redis connection
+Configure environment variables and .env files
+Phase 2: Core Backend
+Build Auth module (register, login, 2FA, password reset)
+Build Users module (CRUD, roles, permissions)
+Build Tenants module (multi-tenancy, context resolver)
+Build RBAC system (roles, permissions, guards, decorators)
+Build Audit log module
+Build Notifications module (in-app, email, WebSocket)
+Build Files module (upload, optimization, storage)
+Build Billing/Subscriptions module
+Phase 3: Core Frontend
+Build App Shell (layout, sidebar, header, breadcrumbs)
+Build Auth pages (login, register, forgot, reset, 2FA)
+Build Onboarding wizard
+Build Dashboard page (KPI cards, charts, activity feed)
+Build Settings pages (general, team, security, appearance)
+Build reusable components (tables, forms, modals, cards, charts, filters)
+Phase 4: E-Commerce Module
+Build Store module (backend + frontend)
+Build Product module (backend + frontend)
+Build Order module (backend + frontend)
+Build Inventory module (backend + frontend)
+Build Payment integrations (COD, CIB, Edahabia, Stripe, PayPal)
+Build Shipping integrations
+Build Storefront (product pages, cart, checkout, customer portal)
+Phase 5: Marketing Module
+Build Email marketing (backend + frontend)
+Build SMS marketing (backend + frontend)
+Build Social media management (backend + frontend)
+Build Ad campaign management (backend + frontend)
+Build SEO tools (backend + frontend)
+Build Landing page builder (backend + frontend)
+Phase 6: CRM Module
+Build Customer management (backend + frontend)
+Build Pipeline management (backend + frontend)
+Build Customer journey tracking
+Build Loyalty program (backend + frontend)
+Build Support/ticket system (backend + frontend)
+Phase 7: Analytics Module
+Build Analytics dashboard (backend + frontend)
+Build Reports system (backend + frontend)
+Build Real-time analytics (WebSocket + frontend)
+Phase 8: Automation Module
+Build Workflow engine (backend)
+Build Workflow visual builder (frontend)
+Build Automation rules engine (backend)
+Build Pre-built automations
+Build Automation execution history and logging
+Phase 9: AI Agents Module
+Build Agent service architecture (base agent class, task queue, event bus)
+Build Audience Analyst agent
+Build Campaign Builder agent
+Build Content Generator agent
+Build Product Recommender agent
+Build Customer Manager agent
+Build Decision Support agent
+Build Automation Orchestrator agent
+Build Agent dashboard (frontend)
+Build Agent settings and configuration UI
+Phase 10: Integrations
+Build Integration framework (OAuth, API key, webhook)
+Build Payment integrations
+Build Shipping integrations
+Build Email service integrations
+Build SMS service integrations
+Build Social media integrations
+Build Analytics integrations
+Build API Gateway (REST, GraphQL, OpenAPI docs)
+Phase 11: Marketing Pages
+Build Landing page (hero, features, pricing, testimonials, FAQ)
+Build Feature detail pages
+Build Pricing page
+Build About page
+Build Contact page
+Build Legal pages
+Build Blog
+Build Documentation/Help center
+Phase 12: Polish & Deploy
+Build Command palette (cmd+K)
+Build Global search
+Build Notification center
+Build PWA configuration
+Performance optimization (code splitting, lazy loading, caching)
+Accessibility audit and fixes
+SEO optimization (meta tags, structured data, sitemap)
+Security audit (headers, CORS, input validation)
+Error handling and error boundaries
+Loading states (skeletons, spinners, shimmer)
+Empty states (illustrations, CTAs)
+404 and 500 error pages
+Build Docker configuration (docker-compose for dev, Dockerfile for prod)
+Build CI/CD pipeline configuration
+Environment configuration (dev, staging, production)
+Database migrations and seeding
+Final testing (E2E with Playwright, unit tests with Vitest)
+Build documentation (README, setup guide, architecture docs)
+Deploy
+10.2 Quality Standards
+Every form must have client-side AND server-side validation
+Every table must have: search, filters, sorting, pagination, bulk actions, export
+Every list must have: empty state, loading state, error state, no-results state
+Every modal must have: backdrop, close button, escape key, focus trap, restore focus
+Every notification must have: title, message, action (optional), dismiss
+Every page must have: breadcrumb, title, responsive layout, proper meta tags
+Every API endpoint must have: auth guard, tenant context, rate limiting, input validation, error handling, audit logging
+Every database table must have: id (UUID), tenant_id, created_at, updated_at, appropriate indexes
+Every component must be: accessible, responsive, themed, internationalized, typed
+10.3 File Structure
+
+ge-sky/
+├── apps/
+│   ├── web/                    # Next.js frontend
+│   │   ├── app/                # App Router pages
+│   │   │   ├── (marketing)/    # Public marketing pages
+│   │   │   ├── (auth)/         # Auth pages
+│   │   │   ├── (app)/          # Authenticated app pages
+│   │   │   └── (store)/       # Storefront pages
+│   │   ├── components/         # React components
+│   │   │   ├── ui/             # Base UI components
+│   │   │   ├── modules/        # Feature-specific components
+│   │   │   ├── layouts/        # Layout components
+│   │   │   └── shared/         # Shared components
+│   │   ├── lib/                # Utilities, hooks, configs
+│   │   ├── styles/             # Global styles, tokens
+│   │   ├── public/             # Static assets
+│   │   ├── messages/           # i18n translation files
+│   │   │   ├── ar.json
+│   │   │   ├── fr.json
+│   │   │   └── en.json
+│   │   └── middleware.ts       # i18n + auth middleware
+│   ├── api/                    # NestJS backend
+│   │   ├── src/
+│   │   │   ├── modules/        # Feature modules
+│   │   │   ├── common/         # Shared code
+│   │   │   ├── config/         # Configuration
+│   │   │   └── main.ts         # Entry point
+│   │   └── prisma/
+│   │       ├── schema.prisma   # Database schema
+│   │       ├── migrations/     # Migrations
+│   │       └── seed.ts         # Seed data
+│   └── shared/                 # Shared types and utilities
+├── packages/                   # Shared packages (optional)
+├── docker-compose.yml          # Development environment
+├── Dockerfile                  # Production build
+├── turbo.json                  # Monorepo config
+└── package.json                # Root package
+10.4 Environment Variables
+
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/ge_sky
+REDIS_URL=redis://localhost:6379
+ELASTICSEARCH_URL=http://localhost:9200
+
+# Auth
+JWT_ACCESS_SECRET=...
+JWT_REFRESH_SECRET=...
+
+# AI
+OPENAI_API_KEY=...
+
+# Payments
+STRIPE_SECRET_KEY=...
+PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_SECRET=...
+CIB_MERCHANT_ID=...
+EDAHABIA_API_KEY=...
+
+# Email
+SENDGRID_API_KEY=...
+
+# SMS
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+
+# Social
+FACEBOOK_APP_ID=...
+FACEBOOK_APP_SECRET=...
+WHATSAPP_API_TOKEN=...
+TIKTOK_APP_ID=...
+
+# Storage
+S3_ENDPOINT=...
+S3_ACCESS_KEY=...
+S3_SECRET_KEY=...
+S3_BUCKET=ge-sky
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+═══════════════════════════════════════
+FINAL INSTRUCTION
+═══════════════════════════════════════
+Build the COMPLETE platform following every instruction above. Do NOT skip features. Do NOT use placeholder logic. Do NOT leave TODO comments. Every feature must be fully functional with real database operations, real API endpoints, real UI components, and real business logic.
+
+The final product must be:
+
+✅ Fully functional (every feature works end-to-end)
+✅ Interactive (responsive UI with real-time updates)
+✅ Production-ready (error handling, security, performance)
+✅ Deployable (Docker, CI/CD, environment configuration)
+✅ Marketable (polished UI, complete features, competitive positioning)
+✅ Accessible (WCAG AA, keyboard, screen reader, RTL)
+✅ Internationalized (Arabic, French, English with RTL/LTR)
+✅ Secure (auth, RBAC, encryption, audit, GDPR)
+✅ Performant (Lighthouse 90+, fast API, optimized rendering)
+✅ Scalable (multi-tenant, modular, cached, queued)
+Start building NOW. Begin with Phase 1 and work through every phase sequentially. Output complete, production-quality code for every file. Do not abbreviate. Do not summarize. Do not skip. BUILD EVERYTHING.
+
+═══════════════════════════════════════
+SURGICAL EDITING CHANGELOG — Antigravity Agent
+═══════════════════════════════════════
+
+## Session: 2026-08-22
+
+### ✅ COMPLETED — Testing Infrastructure (TDD Protocol)
+
+- Added `test`, `test:watch`, `test:cov`, `test:e2e` scripts to `apps/api/package.json`.
+- Configured `cross-env` + `NODE_OPTIONS=--max-old-space-size=4096` to prevent OOM crashes in Jest.
+- Moved `isolatedModules: true` to `tsconfig.json` (resolved ts-jest deprecation warning).
+- Added `workerIdleMemoryLimit: '512MB'` to `jest.config.js`.
+- Result: **6 Test Suites, 40 Tests — ALL PASSED** in ~4.5s (no OOM crashes).
+
+### ✅ COMPLETED — Sentry Error Tracking Integration
+
+- `@sentry/node` and `@sentry/profiling-node` installed.
+- `src/common/sentry/sentry-init.ts` — already existed, now validated as active.
+- `src/common/sentry/sentry.interceptor.ts` — NEW FILE: global NestJS interceptor that captures all 5xx errors and unhandled exceptions to Sentry. 4xx client errors are intentionally excluded.
+- Registered `SentryInterceptor` globally in `src/main.ts` via `app.useGlobalInterceptors()`.
+- Sentry DSN is read from `SENTRY_DSN_API` env var; gracefully skipped if not set.
+
+### ✅ COMPLETED — Auth Module TDD Tests
+
+- `src/modules/auth/auth.service.spec.ts` — Updated with functional TDD tests:
+  - `register()`: throws `ConflictException` for duplicate email; creates user+tenant+store on success.
+  - `login()`: throws `UnauthorizedException` for invalid credentials; returns JWT on success.
+
+### ✅ COMPLETED — Orders Module Enhancements
+
+- Added `addNote(tenantId, id, note)`: internal staff note logging.
+- Added `processRefund(tenantId, id, { amount, reason })`: full/partial refund processing.
+- Added `getStats(tenantId)`: status counts + total revenue aggregation.
+- Added `bulkUpdateStatus(tenantId, ids, status)`: multi-order batch status updates.
+- Exposed endpoints in `OrdersController` with full validation DTOs.
+
+### ✅ COMPLETED — Products & Catalog Module Enhancements
+
+- Added variant management: `addVariant`, `updateVariant`, `deleteVariant` with JSON options metadata.
+- Added `createCategory(tenantId, data)` for nested category hierarchy.
+- Added `bulkUpdateStatus(tenantId, ids, isActive)` for bulk product availability toggle.
+- Exposed all endpoints in `ProductsController` with Swagger documentation and RBAC guards.
+
+### ✅ COMPLETED — Marketing & Omnichannel Module Enhancements
+
+- Added full CRUD operations for Campaigns (`getCampaign`, `updateCampaign`, `deleteCampaign`).
+- Added Social Media Post creation and scheduling (`createSocialPost`).
+- Added Landing Page builder endpoint (`createLandingPage`) with `isPublished` state management.
+
+### ✅ COMPLETED — CRM & Customers Module Enhancements
+
+- Added `update(tenantId, id, data)` & `delete(tenantId, id)` in `CustomersService`.
+- Added `UpdateCustomerDto` with validation decorators.
+- Exposed `PUT /customers/:id` and `DELETE /customers/:id` in `CustomersController`.
+
+### ✅ COMPLETED — Billing & Subscriptions Module Enhancements
+
+- Added `upgradePlan(tenantId, plan)` in `BillingService`.
+- Exposed `POST /billing/upgrade` in `BillingController` with RBAC guard (`OWNER` only).
+
+### ✅ COMPLETED — Notifications Center Module
+
+- Validated `findAll`, `markAsRead`, and `markAllAsRead` endpoints.
+
+### ✅ VERIFICATION & BUILD STATUS
+
+- `nest build`: **SUCCESS (0 errors)**
+- `npm run test`: **6 Test Suites, 40 Tests — 100% PASSED**
+- No Regression across all core modules.
+
+

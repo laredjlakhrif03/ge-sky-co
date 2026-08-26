@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/ge_sky
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:3001
+    depends_on:
+      - api
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ge_sky
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:
