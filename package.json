@@ -16,8 +16,10 @@
     "db:push": "cd apps/api && npx prisma db push",
     "db:seed": "cd apps/api && ts-node prisma/seed.ts"
   },
+  "dependencies": {
+    "turbo": "^2.0.12"
+  },
   "devDependencies": {
-    "turbo": "^2.0.12",
     "typescript": "^5.4.5"
   },
   "devEngines": {
