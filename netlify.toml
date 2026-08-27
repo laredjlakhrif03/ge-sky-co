@@ -1,5 +1,5 @@
 [build]
-  command = "npx turbo run build --filter=web"
+  command = "cd apps/web && npm run build"
   publish = "apps/web/.next"
 
 [build.environment]
